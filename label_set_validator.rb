@@ -8,6 +8,11 @@ module Prometheus
       # TODO: we might allow setting :instance in the future
       BASE_RESERVED_LABELS = [:job, :instance, :pid].freeze
 
+      class LabelSetError < StandardError; end
+      class InvalidLabelSetError < LabelSetError; end
+      class InvalidLabelError < LabelSetError; end
+      class ReservedLabelError < LabelSetError; end
+
       attr_reader :expected_labels, :reserved_labels
 
       def initialize(expected_labels:, reserved_labels: [])
@@ -17,7 +22,7 @@ module Prometheus
 
       def validate_symbols!(labels)
         unless labels.respond_to?(:all?)
-          raise "#{labels} is not a valid label set"
+          raise InvalidLabelSetError, "#{labels} is not a valid label set"
         end
 
         labels.all? do |key, _|
@@ -36,9 +41,9 @@ module Prometheus
           # InvalidLabelSetError
         end
 
-        raise "labels must have the same signature " \
-              "(keys given: #{labelset.keys} vs." \
-              " keys expected: #{expected_labels}"
+        raise InvalidLabelSetError, "labels must have the same signature " \
+                                    "(keys given: #{labelset.keys} vs." \
+                                    " keys expected: #{expected_labels}"
       end
 
       private
@@ -50,19 +55,19 @@ module Prometheus
       def validate_symbol(key)
         return true if key.is_a?(Symbol)
 
-        raise "label #{key} is not a symbol"
+        raise InvalidLabelError, "label #{key} is not a symbol"
       end
 
       def validate_name(key)
         return true unless key.to_s.start_with?('__')
 
-        raise "label #{key} must not start with __"
+        raise ReservedLabelError, "label #{key} must not start with __"
       end
 
       def validate_reserved_key(key)
         return true unless reserved_labels.include?(key)
 
-        raise "#{key} is reserved"
+        raise ReservedLabelError, "#{key} is reserved"
       end
     end
   end
