@@ -32,7 +32,9 @@ module Prometheus
       end
 
       def unregister(name)
+        @mutex.synchronize do
           @metrics.delete(name.to_sym)
+        end
       end
 
       def counter(name, docstring:, labels: [], preset_labels: {}, store_settings: {})
