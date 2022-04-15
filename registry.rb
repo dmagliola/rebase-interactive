@@ -58,7 +58,8 @@ module Prometheus
                            docstring: docstring,
                            labels: labels,
                            preset_labels: preset_labels,
-                           store_settings: store_settings))
+                           store_settings: store_settings)
+        )
       end
 
       def histogram(name, docstring:, labels: [], preset_labels: {},
@@ -69,19 +70,20 @@ module Prometheus
                                labels: labels,
                                preset_labels: preset_labels,
                                buckets: buckets,
-                               store_settings: store_settings))
+                               store_settings: store_settings)
+        )
       end
 
       def exist?(name)
-        @mutex.synchronize { @metrics.key?(name) }
+        @mutex.synchronize {@metrics.key?(name)}
       end
 
       def get(name)
-        @mutex.synchronize { @metrics[name.to_sym] }
+        @mutex.synchronize {@metrics[name.to_sym]}
       end
 
       def metrics
-        @mutex.synchronize { @metrics.values }
+        @mutex.synchronize {@metrics.values}
       end
     end
   end
