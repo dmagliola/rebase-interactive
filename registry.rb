@@ -21,10 +21,12 @@ module Prometheus
       def register(metric)
         name = metric.name
 
-        if @metrics.key?(name.to_sym)
-          raise AlreadyRegisteredError, "#{name} has already been registered"
+        @mutex.synchronize do
+          if @metrics.key?(name.to_sym)
+            raise AlreadyRegisteredError, "#{name} has already been registered"
+          end
+          @metrics[name.to_sym] = metric
         end
-        @metrics[name.to_sym] = metric
 
         metric
       end
