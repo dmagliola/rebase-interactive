@@ -18,6 +18,21 @@ module Prometheus
         @mutex = Mutex.new
       end
 
+      def register(metric)
+        name = metric.name
+
+        if @metrics.key?(name.to_sym)
+          raise AlreadyRegisteredError, "#{name} has already been registered"
+        end
+        @metrics[name.to_sym] = metric
+
+        metric
+      end
+
+      def unregister(name)
+          @metrics.delete(name.to_sym)
+      end
+
       def counter(name, docstring:, labels: [], preset_labels: {}, store_settings: {})
         register(Counter.new(name,
                              docstring: docstring,
